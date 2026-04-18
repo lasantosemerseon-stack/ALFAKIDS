@@ -1,0 +1,99 @@
+{
+  "theme": "dark",
+  "archetype": "Archetype 5: Jewel & Luxury",
+  "reasoning": "A premium, luxurious educational kids app (alfakids / DIVERSÃO E APRENDIZADO). Target audience is parents willing to pay for premium educational content for 3-5yo. We use a dark background (#0D0D0D) combined with gold (#BF9663) and orange (#D97016), incorporating neon/fluorescent cyan and purple gradients for child-friendly interactive elements while maintaining a high-end luxury aesthetic.",
+  "colors": {
+    "background": {
+      "dark": "#0D0D0D",
+      "light": "#F8F5F2"
+    },
+    "primary": "#BF9663",
+    "primary_hover": "#A67F51",
+    "secondary": "#D97016",
+    "accent_gradients": {
+      "cyan_purple": "linear-gradient(135deg, #00E5FF, #9D4CDD)",
+      "blue_purple": "linear-gradient(135deg, #2563EB, #7C3AED)",
+      "gold_shimmer": "linear-gradient(90deg, transparent, rgba(191, 150, 99, 0.4), transparent)"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A3A3A3",
+      "gold": "#BF9663"
+    },
+    "surface": {
+      "card": "rgba(30, 30, 30, 0.6)",
+      "glass": "rgba(13, 13, 13, 0.7)"
+    }
+  },
+  "typography": {
+    "font_family": {
+      "heading": "'Montserrat', sans-serif",
+      "body": "'Montserrat', sans-serif"
+    },
+    "rules": {
+      "headings": "font-bold tracking-tight",
+      "body": "font-light leading-relaxed",
+      "titles": "Use gold or bright white for titles, with optional subtle text-shadow for a glowing effect."
+    }
+  },
+  "layout_and_spacing": {
+    "spacing_scale": "Generous padding. p-6 to p-8 inside cards, gap-8 in bento grids.",
+    "container_corners": "rounded-2xl to rounded-3xl for a safe, kid-friendly but premium look.",
+    "grid_strategy": "Bento Grid style for the 4 main tabs on desktop. Mobile will stack cards elegantly. Always maintain equal heights for cards using h-full."
+  },
+  "components_and_effects": {
+    "cards": {
+      "style": "Glassmorphism with a 1px border. Dark mode: border-white/10, Light mode: border-black/10.",
+      "effects": "Glowing hover states. Cards should have a subtle backdrop-blur-xl."
+    },
+    "buttons": {
+      "premium_plan": "Animated button with a fluorescent border passing side to side. Achieved via mask-image and a rotating conic-gradient in the background.",
+      "standard": "Rounded-full, luxurious gold (#BF9663) background with black text, or dark background with glowing gold borders."
+    },
+    "animations": {
+      "golden_shimmer": "An animated linear-gradient overlay sliding from left to right, creating a shimmer effect over text or cards.",
+      "glow_pulse": "Periodic scaling and opacity changes of a blurred radial gradient behind key elements.",
+      "fade_in_up": "Initial load staggered fade-in and slide-up for all content blocks (using framer-motion).",
+      "floating": "Slow continuous Y-axis translation for decorative icons or photos.",
+      "fireworks": "For the congratulations screen. A specialized component using Canvas or a library like 'canvas-confetti' configured for star shapes and bright neon colors."
+    }
+  },
+  "navigation": {
+    "header": "Sticky glassmorphism header containing the 'alfakids' logo (animated ABC letters on purple background) and a Dark Mode toggle in the top right.",
+    "bottom_tab": "For mobile view, a floating glass bottom tab bar with 4 icons. For desktop, a sidebar or top navigation."
+  },
+  "pages_and_features": {
+    "1_alfabetizacao": "Literacy tab. 30-day phonics method. Show a progress roadmap with locked/unlocked nodes. Unlocked nodes glow with cyan/purple.",
+    "2_interativo_musical": "Musical instruments + YouTube videos. Use 3D-like buttons for instruments. Include the fireworks animation at the end of a song.",
+    "3_aprender_ingles": "Learn English. Audio + Image cards. Flashcard UI with flip animations.",
+    "4_recursos": "Pedagogical PDF resources. List view with luxurious download buttons and golden document icons.",
+    "login_system": "Sleek, centered login card with glowing borders.",
+    "pwa_install": "A prominent but elegant 'Install App' banner or button with a subtle pulse animation."
+  },
+  "media_and_assets": {
+    "icons_library": "@phosphor-icons/react for premium duotone/fill icons.",
+    "images": [
+      {
+        "category": "background",
+        "url": "https://images.unsplash.com/photo-1761437855740-c894da924d79?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxNzV8MHwxfHNlYXJjaHwxfHxkYXJrJTIwbHV4dXJ5JTIwZ29sZCUyMGFic3RyYWN0JTIwYmFja2dyb3VuZHxlbnwwfHx8fDE3NzY0Nzk3MzF8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Golden metallic lines against a black background for the premium feel"
+      },
+      {
+         "category": "learning_magic",
+         "url": "https://images.unsplash.com/photo-1733207755305-6d616d58abec?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHw0fHxraWRzJTIwbGVhcm5pbmclMjBtYWdpY3xlbnwwfHx8fDE3NzY0Nzk3NDN8MA&ixlib=rb-4.1.0&q=85",
+         "description": "A wooden block spelling magic on top of a book for the English tab"
+      }
+    ]
+  },
+  "instructions_to_main_agent": [
+    "IMPORTANT: Apply Montserrat font globally. Add `<link href=\"https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&display=swap\" rel=\"stylesheet\">` to index.html and update tailwind font family rules.",
+    "Use framer-motion extensively for the 'fade-in-up', 'floating', and 'golden shimmer' effects.",
+    "To achieve the 'fluorescent border passing side to side' on the premium button, create a wrapper div with a rotating conic-gradient (cyan/purple) and padding of 2px, then an inner div with the dark background. Use framer-motion to spin the gradient.",
+    "Implement the 'alfakids' logo as requested: 'alfakids aprender a ler' text accompanied by animated ABC letters set against a purple background.",
+    "For the congratulations screen, use the 'canvas-confetti' package, configured to burst bright cyan, purple, and gold colors to mimic fireworks.",
+    "The 4 main sections should be built as independent views navigated via a sleek floating tab bar on mobile, and a sticky header nav on desktop.",
+    "Ensure dark mode toggle is clearly visible in the top corner and fully functional.",
+    "Build the progress map in the Alfabetização tab using connected nodes (circles), where locked nodes are gray/faded and unlocked ones glow intensely.",
+    "Install the following dependencies: framer-motion, @phosphor-icons/react, canvas-confetti, lucide-react."
+  ]
+}
