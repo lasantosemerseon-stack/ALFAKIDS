@@ -45,7 +45,7 @@ export default function MusicaTab() {
 
   const instrumentIcon = (name: string) => {
     const icons: Record<string, string> = {
-      piano: 'musical-note', violao: 'guitar', flauta: 'mic', bateria: 'disc',
+      piano: 'musical-note', violao: 'musical-notes', flauta: 'mic', bateria: 'disc',
       baixo: 'radio', pandeiro: 'ellipse', violino: 'pulse',
     };
     return icons[name] || 'musical-note';
