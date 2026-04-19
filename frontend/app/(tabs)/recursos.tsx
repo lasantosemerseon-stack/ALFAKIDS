@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Linking, Image } from 'react-native';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 
 const API_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const COLORIFY_URL = 'https://colorifypro.lovable.app/';
+const COLORIFY_IMG = 'https://images.unsplash.com/photo-1620398722262-969d8f2bc875?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwxfHxjaGlsZHJlbiUyMGNvbG9yaW5nJTIwZHJhd2luZyUyMGhhbGYlMjBjb2xvcmVkfGVufDB8fHx8MTc3NjU2NDQ4N3ww&ixlib=rb-4.1.0&q=85';
 
 const CATEGORY_INFO: Record<string, { label: string; icon: string; color: string }> = {
   pedagogico: { label: 'Recursos Pedagógicos', icon: 'school', color: '#2563EB' },
@@ -45,21 +46,30 @@ export default function RecursosTab() {
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Colorify Section */}
+        {/* Gradient Title */}
+        <Animated.View entering={FadeInDown.duration(400)} style={styles.titleSection}>
+          <Text style={[styles.sectionTitle, { color: colors.primary }]}>Recursos Pedagógicos</Text>
+          <View style={styles.titleUnderline}>
+            <View style={[styles.underlinePart, { backgroundColor: colors.primary }]} />
+            <View style={[styles.underlinePart, { backgroundColor: colors.accent }]} />
+            <View style={[styles.underlinePart, { backgroundColor: colors.secondary }]} />
+          </View>
+        </Animated.View>
+
+        {/* Colorify Section with Image */}
         <Animated.View entering={FadeInDown.duration(500)}>
           <TouchableOpacity
             testID="colorify-btn"
-            style={[styles.colorifyCard, { borderColor: colors.secondary }]}
+            style={[styles.colorifyCard, { borderColor: colors.primary }]}
             onPress={() => Linking.openURL(COLORIFY_URL)}
           >
-            <View style={[styles.colorifyIcon, { backgroundColor: colors.secondary + '20' }]}>
-              <Ionicons name="color-palette" size={28} color={colors.secondary} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={[styles.colorifyTitle, { color: colors.text }]}>
+            <Image source={{ uri: COLORIFY_IMG }} style={styles.colorifyImage} resizeMode="cover" />
+            <View style={styles.colorifyOverlay}>
+              <Ionicons name="color-palette" size={28} color="#fff" />
+              <Text style={styles.colorifyTitle}>
                 Transforme suas fotos em desenhos em segundos e imprima para pintar em família
               </Text>
-              <Text style={[styles.colorifySubtitle, { color: colors.secondary }]}>Abrir App de Colorir →</Text>
+              <Text style={styles.colorifySubtitle}>Abrir App de Colorir →</Text>
             </View>
           </TouchableOpacity>
         </Animated.View>
@@ -116,10 +126,15 @@ export default function RecursosTab() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16 },
-  colorifyCard: { borderRadius: 16, padding: 16, borderWidth: 1.5, flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 24 },
-  colorifyIcon: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  colorifyTitle: { fontSize: 13, fontWeight: '600', lineHeight: 18, marginBottom: 4 },
-  colorifySubtitle: { fontSize: 12, fontWeight: '700' },
+  colorifyCard: { borderRadius: 18, borderWidth: 2, marginBottom: 24, overflow: 'hidden', position: 'relative', height: 180 },
+  colorifyImage: { width: '100%', height: '100%', position: 'absolute' },
+  colorifyOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', padding: 16, justifyContent: 'center', alignItems: 'center', gap: 8 },
+  colorifyTitle: { fontSize: 14, fontWeight: '700', lineHeight: 20, color: '#fff', textAlign: 'center' },
+  colorifySubtitle: { fontSize: 13, fontWeight: '800', color: '#01CFC9' },
+  titleSection: { marginBottom: 16 },
+  sectionTitle: { fontSize: 22, fontWeight: '800', letterSpacing: 1 },
+  titleUnderline: { flexDirection: 'row', gap: 4, marginTop: 6 },
+  underlinePart: { width: 24, height: 3, borderRadius: 2 },
   categoryHeader: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 10, marginTop: 16 },
   catIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   catTitle: { fontSize: 16, fontWeight: '700', flex: 1 },

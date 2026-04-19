@@ -11,7 +11,7 @@ export default function TabLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: colors.bg, elevation: 0, shadowOpacity: 0, borderBottomWidth: 0.5, borderBottomColor: colors.cardBorder },
         headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: '700', fontSize: 16, color: colors.primary },
+        headerTitleStyle: { fontWeight: '700', fontSize: 16, color: colors.secondary },
         tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.cardBorder, borderTopWidth: 0.5, height: 60, paddingBottom: 8 },
         tabBarActiveTintColor: colors.secondary,
         tabBarInactiveTintColor: colors.textSecondary,
