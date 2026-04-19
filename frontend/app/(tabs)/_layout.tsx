@@ -1,7 +1,9 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
-import { TouchableOpacity, Text, View, StyleSheet } from 'react-native';
+import { TouchableOpacity, View, StyleSheet, Image, Text } from 'react-native';
+
+const NEW_LOGO = 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/j41hwonf_Design%20sem%20nome%20%285%29.png';
 
 export default function TabLayout() {
   const { colors, toggle, mode } = useTheme();
@@ -9,25 +11,33 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.bg, elevation: 0, shadowOpacity: 0, borderBottomWidth: 0.5, borderBottomColor: colors.cardBorder },
+        headerStyle: { backgroundColor: colors.bg, elevation: 0, shadowOpacity: 0, borderBottomWidth: 0, height: 70 },
         headerTintColor: colors.text,
-        headerTitleStyle: { fontWeight: '700', fontSize: 16, color: colors.secondary },
-        tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.cardBorder, borderTopWidth: 0.5, height: 60, paddingBottom: 8 },
-        tabBarActiveTintColor: colors.secondary,
-        tabBarInactiveTintColor: colors.textSecondary,
-        tabBarLabelStyle: { fontSize: 10, fontWeight: '600' },
-        headerRight: () => (
-          <TouchableOpacity testID="dark-mode-toggle" onPress={toggle} style={styles.themeBtn}>
-            <Ionicons name={mode === 'dark' ? 'sunny' : 'moon'} size={20} color={colors.primary} />
+        headerTitle: () => (
+          <Image source={{ uri: NEW_LOGO }} style={styles.headerLogo} resizeMode="contain" />
+        ),
+        headerLeft: () => (
+          <TouchableOpacity testID="menu-btn" style={styles.menuBtn}>
+            <Ionicons name="menu" size={24} color={colors.primary} />
           </TouchableOpacity>
         ),
+        headerRight: () => (
+          <TouchableOpacity testID="dark-mode-toggle" onPress={toggle} style={styles.themeBtn}>
+            <View style={[styles.themeCircle, { backgroundColor: colors.primary + '20', borderColor: colors.primary + '40' }]}>
+              <Ionicons name={mode === 'dark' ? 'sunny' : 'moon'} size={18} color={colors.primary} />
+            </View>
+          </TouchableOpacity>
+        ),
+        tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.primary + '15', borderTopWidth: 1, height: 64, paddingBottom: 8, paddingTop: 4 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
       }}
     >
       <Tabs.Screen
         name="musica"
         options={{
           title: 'Músicas',
-          headerTitle: 'alfakids',
           tabBarIcon: ({ color, size }) => <Ionicons name="musical-notes" size={size} color={color} />,
         }}
       />
@@ -35,7 +45,6 @@ export default function TabLayout() {
         name="alfabetizacao"
         options={{
           title: 'ABC',
-          headerTitle: 'Alfabetização',
           tabBarIcon: ({ color, size }) => <Ionicons name="book" size={size} color={color} />,
         }}
       />
@@ -43,7 +52,6 @@ export default function TabLayout() {
         name="ingles"
         options={{
           title: 'English',
-          headerTitle: 'Aprender em Inglês',
           tabBarIcon: ({ color, size }) => <Ionicons name="language" size={size} color={color} />,
         }}
       />
@@ -51,7 +59,6 @@ export default function TabLayout() {
         name="recursos"
         options={{
           title: 'Recursos',
-          headerTitle: 'Recursos Pedagógicos',
           tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" size={size} color={color} />,
         }}
       />
@@ -60,5 +67,8 @@ export default function TabLayout() {
 }
 
 const styles = StyleSheet.create({
-  themeBtn: { marginRight: 16, padding: 6 },
+  menuBtn: { marginLeft: 16, padding: 6 },
+  themeBtn: { marginRight: 16, padding: 4 },
+  themeCircle: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
+  headerLogo: { width: 120, height: 40 },
 });
