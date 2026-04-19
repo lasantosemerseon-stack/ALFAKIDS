@@ -19,24 +19,52 @@ const INSTRUMENT_META: Record<string, { label: string; icon: string; color: stri
   violino: { label: 'Violino', icon: 'pulse', color: '#EC4899', freq: 440, wave: 'sawtooth' },
 };
 
-// Web Audio synthesizer
-function playInstrumentSound(freq: number, waveType: OscillatorType, duration = 0.3) {
-  if (Platform.OS !== 'web') return;
+// Web Audio synthesizer - CONTINUOUS looping sounds
+const audioContextRef: { current: any } = { current: null };
+const activeOscillators: Map<string, { osc: any; gain: any }> = new Map();
+
+function getAudioContext() {
+  if (Platform.OS !== 'web') return null;
   try {
-    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    if (!audioContextRef.current) {
+      const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return null;
+      audioContextRef.current = new AudioCtx();
+    }
+    return audioContextRef.current;
+  } catch (e) { return null; }
+}
+
+function startInstrumentSound(inst: string, freq: number, waveType: OscillatorType) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  stopInstrumentSound(inst);
+  try {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = waveType;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + duration);
+    activeOscillators.set(inst, { osc, gain });
   } catch (e) { /* ignore */ }
+}
+
+function stopInstrumentSound(inst: string) {
+  const entry = activeOscillators.get(inst);
+  if (entry) {
+    try {
+      entry.gain.gain.exponentialRampToValueAtTime(0.001, getAudioContext()!.currentTime + 0.1);
+      setTimeout(() => { try { entry.osc.stop(); } catch(e) {} }, 150);
+    } catch (e) { /* ignore */ }
+    activeOscillators.delete(inst);
+  }
+}
+
+function stopAllSounds() {
+  activeOscillators.forEach((_, inst) => stopInstrumentSound(inst));
 }
 
 export default function SongPlayer() {
@@ -63,7 +91,7 @@ export default function SongPlayer() {
         }).catch(console.log)
         .finally(() => setLoading(false));
     }
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => { if (timerRef.current) clearInterval(timerRef.current); stopAllSounds(); };
   }, [id]);
 
   useEffect(() => {
@@ -87,6 +115,7 @@ export default function SongPlayer() {
 
   const endSong = () => {
     setIsPlaying(false);
+    stopAllSounds();
     const finalScore = Math.min(10, Math.round(scoreRef.current * 10) / 10);
     setScore(finalScore);
     setShowFireworks(true);
@@ -98,22 +127,19 @@ export default function SongPlayer() {
       const next = new Set(prev);
       if (next.has(inst)) {
         next.delete(inst);
+        stopInstrumentSound(inst);
       } else {
         next.add(inst);
-        // Play sound when activating
-        if (meta) playInstrumentSound(meta.freq, meta.wave, 0.5);
+        if (meta) startInstrumentSound(inst, meta.freq, meta.wave);
       }
-      if (next.size === 0) setIsPlaying(false);
+      if (next.size === 0) { setIsPlaying(false); stopAllSounds(); }
       return next;
     });
   }, []);
 
   const tapInstrument = useCallback((inst: string) => {
-    const meta = INSTRUMENT_META[inst];
-    if (meta && activeInstruments.has(inst)) {
-      playInstrumentSound(meta.freq, meta.wave, 0.25);
-    }
-  }, [activeInstruments]);
+    // Already playing continuously, just visual feedback
+  }, []);
 
   const startPlaying = () => {
     if (activeInstruments.size > 0) {
@@ -223,11 +249,7 @@ export default function SongPlayer() {
                     borderColor: isActive ? meta.color : 'transparent',
                     borderWidth: isActive ? 2 : 1,
                   }]}
-                  onPress={() => {
-                    if (isActive) { tapInstrument(inst); }
-                    else { toggleInstrument(inst); }
-                  }}
-                  onLongPress={() => toggleInstrument(inst)}
+                  onPress={() => toggleInstrument(inst)}
                   activeOpacity={0.6}
                 >
                   <View style={[styles.instrumentIcon, { backgroundColor: isActive ? meta.color : colors.textSecondary + '40' }]}>
@@ -238,7 +260,7 @@ export default function SongPlayer() {
                       {meta.label}
                     </Text>
                     <Text style={[styles.instrumentHint, { color: isActive ? meta.color : colors.textSecondary }]}>
-                      {isActive ? 'Toque para tocar • Segure para desligar' : 'Toque para ativar'}
+                      {isActive ? 'Tocando... Toque para parar' : 'Toque para ativar'}
                     </Text>
                   </View>
                   <View style={[styles.statusDot, { backgroundColor: isActive ? meta.color : colors.textSecondary + '40' }]} />
