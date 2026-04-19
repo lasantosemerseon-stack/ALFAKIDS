@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { TouchableOpacity, View, StyleSheet, Image, Text } from 'react-native';
 
-const NEW_LOGO = 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/j41hwonf_Design%20sem%20nome%20%285%29.png';
+const LOGO_SEM_FUNDO = 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/cz5cen1e_logo%20fundo.png';
 
 export default function TabLayout() {
   const { colors, toggle, mode } = useTheme();
@@ -14,7 +14,7 @@ export default function TabLayout() {
         headerStyle: { backgroundColor: colors.bg, elevation: 0, shadowOpacity: 0, borderBottomWidth: 0, height: 70 },
         headerTintColor: colors.text,
         headerTitle: () => (
-          <Image source={{ uri: NEW_LOGO }} style={styles.headerLogo} resizeMode="contain" />
+          <Image source={{ uri: LOGO_SEM_FUNDO }} style={styles.headerLogo} resizeMode="contain" />
         ),
         headerLeft: () => (
           <TouchableOpacity testID="menu-btn" style={styles.menuBtn}>

@@ -43,12 +43,6 @@ export default function PlansScreen() {
 
         {/* LIFETIME PLAN - Premium with glow */}
         <Animated.View entering={FadeInDown.delay(400).duration(700)}>
-          <View style={styles.planGlowWrapper}>
-            {/* Glow effects */}
-            <View style={[styles.planGlowTop, { backgroundColor: colors.primary }]} />
-            <View style={[styles.planGlowRight, { backgroundColor: colors.secondary }]} />
-            <View style={[styles.planGlowBottom, { backgroundColor: colors.primary }]} />
-
             <View style={[styles.planCard, styles.planFeatured, { borderColor: colors.primary + '50' }]}>
               {/* Badge */}
               <View style={[styles.badge, { backgroundColor: colors.primary }]}>
@@ -81,18 +75,14 @@ export default function PlansScreen() {
                 ))}
               </View>
 
-              {/* Glow button */}
-              <View style={styles.btnGlowWrapper}>
-                <View style={[styles.btnGlow, { backgroundColor: colors.primary, opacity: 0.25 }]} />
-                <TouchableOpacity testID="plan-lifetime-btn" style={[styles.planBtn, { backgroundColor: colors.primary }]} onPress={() => Linking.openURL(CHECKOUT_LIFETIME)} activeOpacity={0.8}>
-                  <Ionicons name="diamond" size={20} color="#fff" />
-                  <Text style={styles.planBtnText}>QUERO ACESSO VITALÍCIO</Text>
-                </TouchableOpacity>
-              </View>
+              {/* Button */}
+              <TouchableOpacity testID="plan-lifetime-btn" style={[styles.planBtn, { backgroundColor: colors.primary }]} onPress={() => Linking.openURL(CHECKOUT_LIFETIME)} activeOpacity={0.8}>
+                <Ionicons name="diamond" size={20} color="#fff" />
+                <Text style={styles.planBtnText}>QUERO ACESSO VITALÍCIO</Text>
+              </TouchableOpacity>
 
               <Text style={[styles.guarantee, { color: 'rgba(255,255,255,0.3)' }]}>Acesso imediato após o pagamento</Text>
             </View>
-          </View>
         </Animated.View>
 
         {/* MONTHLY PLAN */}

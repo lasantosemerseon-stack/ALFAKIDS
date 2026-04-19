@@ -27,8 +27,8 @@ api_router = APIRouter(prefix="/api")
 
 JWT_SECRET = os.environ['JWT_SECRET']
 JWT_ALGORITHM = "HS256"
-PREMIUM_PASSWORD = os.environ['PREMIUM_PASSWORD']
-ALFA_PASSWORD = os.environ['ALFA_PASSWORD']
+PREMIUM_PASSWORD = os.environ.get('PREMIUM_PASSWORD', 'alfakids321')
+ALFA_PASSWORD = os.environ.get('ALFA_PASSWORD', 'alfakids321')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
