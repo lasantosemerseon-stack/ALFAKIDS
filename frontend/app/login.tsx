@@ -26,7 +26,7 @@ export default function LoginScreen() {
     setError('');
     const success = await login(email, name, password, 'premium');
     setLoading(false);
-    if (success) { router.replace('/(tabs)/musica'); }
+    if (success) { router.replace('/(tabs)/videoaulas'); }
     else { setError('Senha incorreta. Verifique e tente novamente.'); }
   };
 

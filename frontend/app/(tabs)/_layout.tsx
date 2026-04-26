@@ -13,8 +13,9 @@ export default function TabLayout() {
   const router = useRouter();
 
   const menuItems = [
-    { label: 'Músicas', icon: 'musical-notes', route: '/(tabs)/musica' },
-    { label: 'Alfabetização', icon: 'book', route: '/(tabs)/alfabetizacao' },
+    { label: 'Videoaulas do Panda', icon: 'play-circle', route: '/(tabs)/videoaulas' },
+    { label: 'Alfabetização 30 Dias', icon: 'book', route: '/(tabs)/alfabetizacao' },
+    { label: '+100 Vídeos', icon: 'videocam', route: '/(tabs)/videos100' },
     { label: 'Aprender Inglês', icon: 'language', route: '/(tabs)/ingles' },
     { label: 'Recursos', icon: 'folder-open', route: '/(tabs)/recursos' },
     { label: 'Ver Planos', icon: 'diamond', route: '/plans' },
@@ -46,16 +47,18 @@ export default function TabLayout() {
               </View>
             </TouchableOpacity>
           ),
-          tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.primary + '15', borderTopWidth: 1, height: 64, paddingBottom: 8, paddingTop: 4 },
+          tabBarStyle: { backgroundColor: colors.bg, borderTopColor: colors.primary + '15', borderTopWidth: 1, height: 68, paddingBottom: 8, paddingTop: 4 },
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textSecondary,
-          tabBarLabelStyle: { fontSize: 10, fontWeight: '700' },
+          tabBarLabelStyle: { fontSize: 9, fontWeight: '700' },
         }}
       >
-        <Tabs.Screen name="musica" options={{ title: 'Músicas', tabBarIcon: ({ color, size }) => <Ionicons name="musical-notes" size={size} color={color} /> }} />
-        <Tabs.Screen name="alfabetizacao" options={{ title: 'ABC', tabBarIcon: ({ color, size }) => <Ionicons name="book" size={size} color={color} /> }} />
+        <Tabs.Screen name="videoaulas" options={{ title: 'Panda', tabBarIcon: ({ color, size }) => <Ionicons name="play-circle" size={size} color={color} /> }} />
+        <Tabs.Screen name="alfabetizacao" options={{ title: '30 Dias', tabBarIcon: ({ color, size }) => <Ionicons name="book" size={size} color={color} /> }} />
+        <Tabs.Screen name="videos100" options={{ title: 'Vídeos', tabBarIcon: ({ color, size }) => <Ionicons name="videocam" size={size} color={color} /> }} />
         <Tabs.Screen name="ingles" options={{ title: 'English', tabBarIcon: ({ color, size }) => <Ionicons name="language" size={size} color={color} /> }} />
         <Tabs.Screen name="recursos" options={{ title: 'Recursos', tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" size={size} color={color} /> }} />
+        <Tabs.Screen name="musica" options={{ href: null }} />
       </Tabs>
 
       <Modal visible={menuOpen} transparent animationType="fade">
@@ -69,12 +72,8 @@ export default function TabLayout() {
             </View>
             <View style={[styles.menuDivider, { backgroundColor: colors.primary + '20' }]} />
             {menuItems.map((item, i) => (
-              <TouchableOpacity
-                key={i}
-                testID={`menu-item-${i}`}
-                style={styles.menuItem}
-                onPress={() => { setMenuOpen(false); router.push(item.route as any); }}
-              >
+              <TouchableOpacity key={i} testID={`menu-item-${i}`} style={styles.menuItem}
+                onPress={() => { setMenuOpen(false); router.push(item.route as any); }}>
                 <Ionicons name={item.icon as any} size={20} color={colors.primary} />
                 <Text style={[styles.menuItemText, { color: colors.text }]}>{item.label}</Text>
               </TouchableOpacity>
