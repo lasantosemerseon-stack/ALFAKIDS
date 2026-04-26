@@ -4,7 +4,7 @@ import { useTheme } from '../../src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
-const COLORIFY_COVER = 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/2598wx70_COLRIFY%20APP.png';
+const COLORIFY_COVER = 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/8yfeqe3h_sobe-mais-o-texto-e-o-degrade_HXZRt9ZPRrqFcbPGPCa0lw_QhVcVxyURQK-LLo-is6Wcw_cover_4k.png';
 const COLORIFY_URL = 'https://colorifypro.lovable.app/';
 
 export default function DesenhoTab() {

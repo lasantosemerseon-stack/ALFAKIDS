@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   underlinePart: { width: 24, height: 3, borderRadius: 2 },
   sectionSub: { fontSize: 13, marginTop: 6 },
   coverCard: { borderRadius: 18, overflow: 'hidden', marginBottom: 14, position: 'relative' },
-  coverImage: { width: '100%', height: 180 },
+  coverImage: { width: '100%', aspectRatio: 1 },
   coverOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 10, backgroundColor: 'rgba(0,0,0,0.5)' },
   coverCount: { color: '#fff', fontSize: 12, fontWeight: '700', textAlign: 'right' },
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
