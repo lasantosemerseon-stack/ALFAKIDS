@@ -32,6 +32,7 @@ export default function TabLayout() {
               <Image source={{ uri: LOGO_SEM_FUNDO }} style={styles.headerLogo} resizeMode="contain" />
             </View>
           ),
+          headerTitleAlign: 'center' as const,
           headerLeft: () => (
             <TouchableOpacity testID="menu-btn" style={styles.menuBtn} onPress={() => setMenuOpen(true)}>
               <View style={styles.menuLines}>

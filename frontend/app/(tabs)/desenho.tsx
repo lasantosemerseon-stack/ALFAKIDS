@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   underlinePart: { width: 24, height: 3, borderRadius: 2 },
   sectionSub: { fontSize: 13, marginTop: 8, lineHeight: 18 },
   coverCard: { borderRadius: 18, overflow: 'hidden', marginBottom: 20 },
-  coverImage: { width: '100%', height: 300 },
+  coverImage: { width: '100%', aspectRatio: 1 },
   openBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingVertical: 18, borderRadius: 18 },
   openBtnText: { color: '#fff', fontSize: 16, fontWeight: '900', letterSpacing: 1 },
 });
