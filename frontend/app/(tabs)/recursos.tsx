@@ -56,24 +56,6 @@ export default function RecursosTab() {
           </View>
         </Animated.View>
 
-        {/* Colorify Section with Image */}
-        <Animated.View entering={FadeInDown.duration(500)}>
-          <TouchableOpacity
-            testID="colorify-btn"
-            style={[styles.colorifyCard, { borderColor: colors.primary }]}
-            onPress={() => Linking.openURL(COLORIFY_URL)}
-          >
-            <Image source={{ uri: COLORIFY_IMG }} style={styles.colorifyImage} resizeMode="cover" />
-            <View style={styles.colorifyOverlay}>
-              <Ionicons name="color-palette" size={28} color="#fff" />
-              <Text style={styles.colorifyTitle}>
-                Transforme suas fotos em desenhos em segundos e imprima para pintar em família
-              </Text>
-              <Text style={styles.colorifySubtitle}>Abrir App de Colorir →</Text>
-            </View>
-          </TouchableOpacity>
-        </Animated.View>
-
         {loading ? (
           <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 30 }} />
         ) : (

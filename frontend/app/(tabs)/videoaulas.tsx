@@ -1,62 +1,68 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Modal, Platform, Image } from 'react-native';
 import { useTheme } from '../../src/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
+const COVERS = {
+  musicas: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/u96rfqaz_MUSICAS%20DA%20VOGAIS%2C.png',
+  vogais: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/9xwu2jxr_CAPA%20VOGAIS%20COM%20O%20PANDA.png',
+  consoantes: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/jw72p0l8_CONSOANTES%20COM%20O%20PANDA.png',
+  silabas: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/z6yg1dl7_S%C3%8DLABAS%20COM%20O%20PANDA.png',
+};
+
 const SECTIONS = [
   {
+    id: 'musicas',
     title: 'Músicas das Vogais',
-    subtitle: 'Clipes musicais para aprender as vogais',
-    icon: 'musical-notes',
-    color: '#FF6B6B',
+    cover: COVERS.musicas,
     videos: [
-      { id: 'ma', title: 'A de Abelha', letter: 'A', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/7cmv8fdh_LETRA%20A%20MUSICA.MOV', type: 'file' },
-      { id: 'me', title: 'E de Elefante', letter: 'E', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/imnynb42_LETRA%20E%20MUSICA.MOV', type: 'file' },
-      { id: 'mi', title: 'I de Iguana', letter: 'I', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/mutiojys_LETRA%20I%20MUSICA.MOV', type: 'file' },
-      { id: 'mo', title: 'O de Ovelha', letter: 'O', url: '', type: 'soon' },
-      { id: 'mu', title: 'U de Unicórnio', letter: 'U', url: '', type: 'soon' },
+      { id: 'ma', title: 'Letra A - Música', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/7cmv8fdh_LETRA%20A%20MUSICA.MOV' },
+      { id: 'me', title: 'Letra E - Música', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/imnynb42_LETRA%20E%20MUSICA.MOV' },
+      { id: 'mi', title: 'Letra I - Música', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/mutiojys_LETRA%20I%20MUSICA.MOV' },
+      { id: 'mo', title: 'Letra O - Música', url: '' },
+      { id: 'mu', title: 'Letra U - Música', url: '' },
     ],
   },
   {
+    id: 'vogais',
     title: 'Vogais com o Panda',
-    subtitle: 'Videoaulas ensinando cada vogal',
-    icon: 'school',
-    color: '#01CFC9',
+    cover: COVERS.vogais,
     videos: [
-      { id: 'va', title: 'Vogal A', letter: 'A', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/1jhlnpjn_VOGAL%20A.MOV', type: 'file' },
-      { id: 've', title: 'Vogal E', letter: 'E', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/gpy48mfn_VOGAL%20E.MOV', type: 'file' },
-      { id: 'vi', title: 'Vogal I', letter: 'I', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/kpzprhbu_VOGAL%20I.MOV', type: 'file' },
-      { id: 'vo', title: 'Vogal O', letter: 'O', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/zra9811o_VOGAL%20O.MOV', type: 'file' },
-      { id: 'vu', title: 'Vogal U', letter: 'U', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/7tjvbc4q_VOGAL%20U.MOV', type: 'file' },
+      { id: 'va', title: 'Vogal A', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/1jhlnpjn_VOGAL%20A.MOV' },
+      { id: 've', title: 'Vogal E', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/gpy48mfn_VOGAL%20E.MOV' },
+      { id: 'vi', title: 'Vogal I', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/kpzprhbu_VOGAL%20I.MOV' },
+      { id: 'vo', title: 'Vogal O', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/zra9811o_VOGAL%20O.MOV' },
+      { id: 'vu', title: 'Vogal U', url: 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/7tjvbc4q_VOGAL%20U.MOV' },
     ],
   },
   {
+    id: 'consoantes',
     title: 'Consoantes com o Panda',
-    subtitle: 'Videoaulas ensinando as consoantes',
-    icon: 'text',
-    color: '#0984E3',
+    cover: COVERS.consoantes,
     videos: [
-      { id: 'cb', title: 'Consoante B', letter: 'B', url: '', type: 'soon' },
-      { id: 'cc', title: 'Consoante C', letter: 'C', url: '', type: 'soon' },
-      { id: 'cd', title: 'Consoante D', letter: 'D', url: '', type: 'soon' },
+      { id: 'cb', title: 'Consoante B', url: '' },
+      { id: 'cc', title: 'Consoante C', url: '' },
+      { id: 'cd', title: 'Consoante D', url: '' },
     ],
   },
   {
+    id: 'silabas',
     title: 'Sílabas com o Panda',
-    subtitle: 'Videoaulas ensinando as sílabas',
-    icon: 'library',
-    color: '#FFD700',
+    cover: COVERS.silabas,
     videos: [
-      { id: 'sba', title: 'Sílabas BA BE BI', letter: 'BA', url: '', type: 'soon' },
-      { id: 'sca', title: 'Sílabas CA CE CI', letter: 'CA', url: '', type: 'soon' },
+      { id: 'sba', title: 'Sílabas BA BE BI', url: '' },
+      { id: 'sca', title: 'Sílabas CA CE CI', url: '' },
     ],
   },
 ];
 
 export default function VideoaulasTab() {
   const { colors } = useTheme();
+  const [openSection, setOpenSection] = useState<string | null>(null);
   const [playingVideo, setPlayingVideo] = useState<{ url: string; title: string } | null>(null);
+
+  const currentSection = SECTIONS.find(s => s.id === openSection);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.bg }]}>
@@ -68,50 +74,56 @@ export default function VideoaulasTab() {
             <View style={[styles.underlinePart, { backgroundColor: colors.accent }]} />
             <View style={[styles.underlinePart, { backgroundColor: colors.secondary }]} />
           </View>
-          <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>Método AlfaSonoro - Aprenda com o Panda!</Text>
+          <Text style={[styles.sectionSub, { color: colors.textSecondary }]}>Método AlfaSonoro</Text>
         </Animated.View>
 
-        {SECTIONS.map((section, sIdx) => (
-          <Animated.View key={section.title} entering={FadeInDown.delay(100 + sIdx * 80).duration(400)}>
-            <View style={styles.sectionHeader}>
-              <View style={[styles.sectionIcon, { backgroundColor: section.color + '20' }]}>
-                <Ionicons name={section.icon as any} size={20} color={section.color} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={[styles.sectionName, { color: colors.text }]}>{section.title}</Text>
-                <Text style={[styles.sectionSubtitle, { color: colors.textSecondary }]}>{section.subtitle}</Text>
-              </View>
-            </View>
-
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardsRow}>
-              {section.videos.map((video) => (
+        {openSection && currentSection ? (
+          <>
+            <TouchableOpacity style={styles.backBtn} onPress={() => setOpenSection(null)}>
+              <Ionicons name="chevron-back" size={22} color={colors.primary} />
+              <Text style={[styles.backText, { color: colors.primary }]}>Voltar</Text>
+            </TouchableOpacity>
+            <Text style={[styles.openTitle, { color: colors.text }]}>{currentSection.title}</Text>
+            {currentSection.videos.map((video, idx) => (
+              <Animated.View key={video.id} entering={FadeInDown.delay(idx * 60).duration(350)}>
                 <TouchableOpacity
-                  key={video.id}
                   testID={`video-${video.id}`}
-                  style={[styles.videoCard, { backgroundColor: video.type === 'soon' ? colors.locked : section.color + '15', borderColor: video.type === 'soon' ? 'transparent' : section.color + '40' }]}
-                  onPress={() => video.type === 'file' && video.url ? setPlayingVideo({ url: video.url, title: video.title }) : null}
-                  activeOpacity={video.type === 'soon' ? 1 : 0.7}
+                  style={[styles.videoItem, { backgroundColor: video.url ? colors.card : colors.locked, borderColor: video.url ? colors.cardBorder : 'transparent' }]}
+                  onPress={() => video.url ? setPlayingVideo({ url: video.url, title: video.title }) : null}
+                  activeOpacity={video.url ? 0.7 : 1}
                 >
-                  <View style={[styles.cardCover, { backgroundColor: video.type === 'soon' ? colors.textSecondary + '30' : section.color + '30' }]}>
-                    <Text style={[styles.letterBig, { color: video.type === 'soon' ? colors.textSecondary : section.color }]}>{video.letter}</Text>
-                    {video.type === 'soon' ? (
-                      <Ionicons name="lock-closed" size={18} color={colors.textSecondary} style={styles.cardOverlayIcon} />
-                    ) : (
-                      <Ionicons name="play-circle" size={24} color={section.color} style={styles.cardOverlayIcon} />
-                    )}
+                  <View style={[styles.videoThumb, { backgroundColor: video.url ? colors.primary + '20' : colors.textSecondary + '20' }]}>
+                    <Ionicons name={video.url ? 'play-circle' : 'lock-closed'} size={28} color={video.url ? colors.primary : colors.textSecondary} />
                   </View>
-                  <Text style={[styles.cardTitle, { color: video.type === 'soon' ? colors.textSecondary : colors.text }]} numberOfLines={1}>{video.title}</Text>
-                  {video.type === 'soon' && <Text style={[styles.soonText, { color: colors.textSecondary }]}>Em breve</Text>}
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.videoTitle, { color: video.url ? colors.text : colors.textSecondary }]}>{video.title}</Text>
+                    {!video.url && <Text style={[styles.soonLabel, { color: colors.textSecondary }]}>Em breve</Text>}
+                  </View>
+                  {video.url && <Ionicons name="chevron-forward" size={20} color={colors.primary} />}
                 </TouchableOpacity>
-              ))}
-            </ScrollView>
-          </Animated.View>
-        ))}
-
+              </Animated.View>
+            ))}
+          </>
+        ) : (
+          SECTIONS.map((section, sIdx) => (
+            <Animated.View key={section.id} entering={FadeInDown.delay(sIdx * 100).duration(400)}>
+              <TouchableOpacity
+                testID={`section-${section.id}`}
+                style={styles.coverCard}
+                onPress={() => setOpenSection(section.id)}
+                activeOpacity={0.85}
+              >
+                <Image source={{ uri: section.cover }} style={styles.coverImage} resizeMode="cover" />
+                <View style={styles.coverOverlay}>
+                  <Text style={styles.coverCount}>{section.videos.filter(v => v.url).length}/{section.videos.length} vídeos</Text>
+                </View>
+              </TouchableOpacity>
+            </Animated.View>
+          ))
+        )}
         <View style={{ height: 30 }} />
       </ScrollView>
 
-      {/* Fullscreen Video Modal */}
       <Modal visible={!!playingVideo} animationType="slide" supportedOrientations={['portrait', 'landscape']}>
         <View style={styles.videoModal}>
           <TouchableOpacity testID="close-video-btn" style={styles.closeVideoBtn} onPress={() => setPlayingVideo(null)}>
@@ -119,17 +131,9 @@ export default function VideoaulasTab() {
           </TouchableOpacity>
           <Text style={styles.videoModalTitle}>{playingVideo?.title}</Text>
           {playingVideo && Platform.OS === 'web' ? (
-            <video
-              src={playingVideo.url}
-              controls
-              autoPlay
-              style={{ width: '100%', height: '80%', backgroundColor: '#000', borderRadius: 12 } as any}
-            />
+            <video src={playingVideo.url} controls autoPlay style={{ width: '100%', height: '80%', backgroundColor: '#000', borderRadius: 12 } as any} />
           ) : (
-            <View style={styles.videoPlaceholder}>
-              <Ionicons name="play-circle" size={64} color="#01CFC9" />
-              <Text style={{ color: '#fff', marginTop: 12 }}>Reproduzindo: {playingVideo?.title}</Text>
-            </View>
+            <View style={styles.placeholder}><Ionicons name="play-circle" size={64} color="#01CFC9" /></View>
           )}
         </View>
       </Modal>
@@ -140,24 +144,24 @@ export default function VideoaulasTab() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   scroll: { padding: 16 },
-  titleSection: { marginBottom: 20 },
+  titleSection: { marginBottom: 16 },
   sectionTitle: { fontSize: 22, fontWeight: '900', letterSpacing: 1 },
   titleUnderline: { flexDirection: 'row', gap: 4, marginTop: 6 },
   underlinePart: { width: 24, height: 3, borderRadius: 2 },
-  sectionSub: { fontSize: 13, marginTop: 8 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12, marginTop: 12 },
-  sectionIcon: { width: 40, height: 40, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
-  sectionName: { fontSize: 17, fontWeight: '800' },
-  sectionSubtitle: { fontSize: 12, marginTop: 2 },
-  cardsRow: { paddingBottom: 8, gap: 12 },
-  videoCard: { width: 140, borderRadius: 16, overflow: 'hidden', borderWidth: 1 },
-  cardCover: { width: '100%', height: 100, alignItems: 'center', justifyContent: 'center', position: 'relative' },
-  letterBig: { fontSize: 36, fontWeight: '900' },
-  cardOverlayIcon: { position: 'absolute', bottom: 6, right: 6 },
-  cardTitle: { fontSize: 12, fontWeight: '700', paddingHorizontal: 10, paddingVertical: 8 },
-  soonText: { fontSize: 10, paddingHorizontal: 10, paddingBottom: 8 },
+  sectionSub: { fontSize: 13, marginTop: 6 },
+  coverCard: { borderRadius: 18, overflow: 'hidden', marginBottom: 14, position: 'relative' },
+  coverImage: { width: '100%', height: 180 },
+  coverOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 10, backgroundColor: 'rgba(0,0,0,0.5)' },
+  coverCount: { color: '#fff', fontSize: 12, fontWeight: '700', textAlign: 'right' },
+  backBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 12 },
+  backText: { fontSize: 14, fontWeight: '600' },
+  openTitle: { fontSize: 20, fontWeight: '900', marginBottom: 16 },
+  videoItem: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 14, borderRadius: 14, borderWidth: 1, marginBottom: 10 },
+  videoThumb: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  videoTitle: { fontSize: 15, fontWeight: '700' },
+  soonLabel: { fontSize: 11, marginTop: 2 },
   videoModal: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center', padding: 16 },
   closeVideoBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10 },
   videoModalTitle: { color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 16 },
-  videoPlaceholder: { width: '100%', height: '70%', backgroundColor: '#111', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  placeholder: { alignItems: 'center', justifyContent: 'center', flex: 1 },
 });
