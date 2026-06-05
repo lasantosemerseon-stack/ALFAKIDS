@@ -131,7 +131,49 @@ export default function VideoaulasTab() {
           </TouchableOpacity>
           <Text style={styles.videoModalTitle}>{playingVideo?.title}</Text>
           {playingVideo && Platform.OS === 'web' ? (
-            <video src={playingVideo.url} controls autoPlay style={{ width: '100%', height: '80%', backgroundColor: '#000', borderRadius: 12 } as any} />
+            <View style={styles.videoWrapper}>
+              {/*
+                Improvements for .MOV files:
+                - <source type="video/mp4"> first forces browser to try MP4 decoder (fixes black screen on Chrome/Edge)
+                - <source type="video/quicktime"> fallback for browsers that respect the actual MIME
+                - preload="auto" starts buffering immediately (faster perceived load)
+                - playsInline mandatory for iOS Safari
+                - controlsList="nodownload noremoteplayback" prevents unwanted UI clutter
+                - objectFit contain + maxHeight 70vh = proper sizing without stretching
+              */}
+              <video
+                key={playingVideo.url}
+                controls
+                autoPlay
+                playsInline
+                preload="auto"
+                controlsList="nodownload noremoteplayback"
+                style={{
+                  width: '100%',
+                  maxHeight: '70vh',
+                  objectFit: 'contain',
+                  backgroundColor: '#000',
+                  borderRadius: 12,
+                } as any}
+              >
+                <source src={playingVideo.url} type="video/mp4" />
+                <source src={playingVideo.url} type="video/quicktime" />
+                Seu navegador não consegue exibir este vídeo.
+              </video>
+              <TouchableOpacity
+                testID="open-external-video-btn"
+                style={styles.openExternalBtn}
+                onPress={() => {
+                  if (typeof window !== 'undefined' && playingVideo) {
+                    window.open(playingVideo.url, '_blank');
+                  }
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="open-outline" size={20} color="#01CFC9" />
+                <Text style={styles.openExternalText}>Não está aparecendo? Abrir em nova janela</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <View style={styles.placeholder}><Ionicons name="play-circle" size={64} color="#01CFC9" /></View>
           )}
@@ -162,6 +204,21 @@ const styles = StyleSheet.create({
   soonLabel: { fontSize: 11, marginTop: 2 },
   videoModal: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center', padding: 16 },
   closeVideoBtn: { position: 'absolute', top: 50, right: 20, zIndex: 10 },
-  videoModalTitle: { color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 16 },
+  videoModalTitle: { color: '#fff', fontSize: 18, fontWeight: '700', marginBottom: 16, textAlign: 'center', maxWidth: 900 },
+  videoWrapper: { width: '100%', maxWidth: 900, alignItems: 'center', justifyContent: 'center' },
+  openExternalBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: 'rgba(1,207,201,0.15)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(1,207,201,0.5)',
+  },
+  openExternalText: { color: '#fff', fontSize: 13, fontWeight: '600' },
   placeholder: { alignItems: 'center', justifyContent: 'center', flex: 1 },
 });
