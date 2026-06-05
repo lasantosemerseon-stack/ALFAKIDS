@@ -40,16 +40,6 @@ export default function Index() {
           <Ionicons name="log-in" size={20} color="#fff" />
           <Text style={styles.primaryBtnText}>ENTRAR</Text>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          testID="view-plans-btn"
-          style={[styles.outlineBtn, { borderColor: colors.secondary }]}
-          onPress={() => router.push('/plans')}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="diamond" size={18} color={colors.secondary} />
-          <Text style={[styles.outlineBtnText, { color: colors.secondary }]}>VER PLANOS</Text>
-        </TouchableOpacity>
       </Animated.View>
 
       <Text style={[styles.footer, { color: colors.textSecondary }]}>© 2026 alfakids - Diversão e Aprendizado</Text>

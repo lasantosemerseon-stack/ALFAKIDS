@@ -18,7 +18,7 @@ export default function TabLayout() {
     { label: '+100 Vídeos', icon: 'videocam', route: '/(tabs)/videos100' },
     { label: 'Aprender Inglês', icon: 'language', route: '/(tabs)/ingles' },
     { label: 'Desenho', icon: 'color-palette', route: '/(tabs)/desenho' },
-    { label: 'Recursos', icon: 'folder-open', route: '/(tabs)/recursos' },
+    { label: 'Bônus', icon: 'gift', route: '/(tabs)/recursos' },
     { label: 'Ver Planos', icon: 'diamond', route: '/plans' },
   ];
 
@@ -60,7 +60,7 @@ export default function TabLayout() {
         <Tabs.Screen name="videos100" options={{ title: 'Vídeos', tabBarIcon: ({ color, size }) => <Ionicons name="videocam" size={size} color={color} /> }} />
         <Tabs.Screen name="ingles" options={{ title: 'English', tabBarIcon: ({ color, size }) => <Ionicons name="language" size={size} color={color} /> }} />
         <Tabs.Screen name="desenho" options={{ title: 'Desenho', tabBarIcon: ({ color, size }) => <Ionicons name="color-palette" size={size} color={color} /> }} />
-        <Tabs.Screen name="recursos" options={{ title: 'Recursos', tabBarIcon: ({ color, size }) => <Ionicons name="folder-open" size={size} color={color} /> }} />
+        <Tabs.Screen name="recursos" options={{ title: 'Bônus', tabBarIcon: ({ color, size }) => <Ionicons name="gift" size={size} color={color} /> }} />
         <Tabs.Screen name="musica" options={{ href: null }} />
       </Tabs>
 

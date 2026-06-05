@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 
 const COLORIFY_COVER = 'https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/9sxcm57d_COLRIFY%20APP.png';
-const COLORIFY_URL = 'https://colorifypro.lovable.app/';
+const COLORIFY_URL = 'https://colorifypro.lovable.app/membro';
 
 export default function DesenhoTab() {
   const { colors } = useTheme();

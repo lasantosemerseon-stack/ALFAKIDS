@@ -333,32 +333,32 @@ async def seed_data():
         await db.english_words.insert_many(words)
         logger.info(f"Seeded {len(words)} English words")
 
-    # Seed resources
-    res_count = await db.resources.count_documents({})
-    if res_count == 0:
-        logger.info("Seeding resources...")
-        resources = [
-            {"id": "r1", "title": "+100 Atividades de Alfabetização", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/5ngk3ehi_%2B100%20ATIVIDADES%20DE%20ALFBETIZA%C3%87%C3%83O.pdf", "category": "pedagogico", "order": 1},
-            {"id": "r2", "title": "Livro da Leitura - Sílabas Simples", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/jz4x10tl_LIVRO-DA-LEITURA-SILABAS-SIMPLES-A.B.pdf.pdf", "category": "pedagogico", "order": 2},
-            {"id": "r3", "title": "Régua da Leitura", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/2vmtan7e_R%C3%89GUA%20DA%20LEITURA%20.pdf.pdf", "category": "pedagogico", "order": 3},
-            {"id": "r4", "title": "Tabela de Palavras em Inglês", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/vmkmf1oc_TABELA%20DE%20PALAVRAS%20EM%20INGLES.pdf", "category": "pedagogico", "order": 4},
-            {"id": "r5", "title": "Entendendo o Autismo", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/07h8h20w_Entendendo%20o%20Autismo.pdf", "category": "autismo", "order": 5},
-            {"id": "r6", "title": "Atividades de Estimulação Cognitiva", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/d7rndwf2_Atividades%20de%20Estimula%C3%A7%C3%A3o%20Cognitiva.pdf", "category": "autismo", "order": 6},
-            {"id": "r7", "title": "Desenvolvendo o Potencial", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/9p05v358_Desenvolvendo%20o%20Potencial.pdf", "category": "autismo", "order": 7},
-            {"id": "r8", "title": "Cardápios Saudáveis", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/r4nnw9ov__Card%C3%A1pios.pdf", "category": "lancheira", "order": 8},
-            {"id": "r9", "title": "Bebidas Saudáveis", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/stv92noh_Bebidas--Saud%C3%A1veis----%281%29%20%281%29.pdf", "category": "lancheira", "order": 9},
-            {"id": "r10", "title": "Lancheira Saudável", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/sm1lreep_lancheira_saud%C3%A1vel%20%281%29.pdf", "category": "lancheira", "order": 10},
-            {"id": "r11", "title": "Lista de Compras", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/ulnlj4ny_Lista--De--Compras%20%281%29.pdf", "category": "lancheira", "order": 11},
-            {"id": "r12", "title": "Planejamento Semanal", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/fvyvq6yq_Planejamento--Semanal--1%20%281%29.pdf", "category": "lancheira", "order": 12},
-            {"id": "r13", "title": "Receitas para Alérgicos", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/9sz8w8ws_Receitas--Al%C3%A9rgicos%20%281%29.pdf", "category": "lancheira", "order": 13},
-            {"id": "r14", "title": "Receitas para Criança +1 Ano", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/hucbv6v1_RECEITAS--PARA--CRIAN%C3%87A--%2B1--ANOS--%281%29%20%281%29.pdf", "category": "lancheira", "order": 14},
-            {"id": "r15", "title": "Receitas Doces Saudáveis", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/ikewvc0p_EBook--Rceitas-----Doces--Saud%C3%A1veis%20%282%29.pdf", "category": "bonus", "order": 15},
-            {"id": "r16", "title": "Alimentação Saudável", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/1ccksi3a_Alimenta%C3%A7%C3%A3o--Saud%C3%A1vel--Parte--1--%281%29%20%281%29.pdf", "category": "bonus", "order": 16},
-            {"id": "r17", "title": "Guia Supermercado", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/d33yr4r5_E-book--Lancheira-----Guia--Supermercado%20%281%29.pdf", "category": "bonus", "order": 17},
-            {"id": "r18", "title": "Guia sobre Açúcar", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/kgzj5cn1_E-book--Lancheira-----A%C3%A7%C3%BAcar%20%281%29.pdf", "category": "bonus", "order": 18},
-        ]
-        await db.resources.insert_many(resources)
-        logger.info(f"Seeded {len(resources)} resources")
+    # Seed resources (force re-seed every startup to keep order/titles fresh)
+    await db.resources.delete_many({})
+    logger.info("Seeding resources (forced refresh)...")
+    resources = [
+        {"id": "b1", "title": "Caderno da Leitura", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/jit1p9mh_CADERNO-DE-LEITURA%20ENTREGAVEL.pdf", "category": "bonus", "bonus_number": 1, "order": 1},
+        {"id": "b2", "title": "Lancheira", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/sm1lreep_lancheira_saud%C3%A1vel%20%281%29.pdf", "category": "bonus", "bonus_number": 2, "order": 2},
+        {"id": "b3", "title": "Cardápios Saudáveis", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/r4nnw9ov__Card%C3%A1pios.pdf", "category": "bonus", "bonus_number": 3, "order": 3},
+        {"id": "b4", "title": "Bebidas Saudáveis", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/stv92noh_Bebidas--Saud%C3%A1veis----%281%29%20%281%29.pdf", "category": "bonus", "bonus_number": 4, "order": 4},
+        {"id": "b5", "title": "Lista de Compras", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/ulnlj4ny_Lista--De--Compras%20%281%29.pdf", "category": "bonus", "bonus_number": 5, "order": 5},
+        {"id": "b6", "title": "Planejamento Semanal", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/fvyvq6yq_Planejamento--Semanal--1%20%281%29.pdf", "category": "bonus", "bonus_number": 6, "order": 6},
+        {"id": "b7", "title": "Receitas para Alérgicos", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/9sz8w8ws_Receitas--Al%C3%A9rgicos%20%281%29.pdf", "category": "bonus", "bonus_number": 7, "order": 7},
+        {"id": "b8", "title": "Receitas para Criança +1 Ano", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/hucbv6v1_RECEITAS--PARA--CRIAN%C3%87A--%2B1--ANOS--%281%29%20%281%29.pdf", "category": "bonus", "bonus_number": 8, "order": 8},
+        {"id": "b9", "title": "Receitas Doces Saudáveis", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/ikewvc0p_EBook--Rceitas-----Doces--Saud%C3%A1veis%20%282%29.pdf", "category": "bonus", "bonus_number": 9, "order": 9},
+        {"id": "b10", "title": "Alimentação Saudável", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/1ccksi3a_Alimenta%C3%A7%C3%A3o--Saud%C3%A1vel--Parte--1--%281%29%20%281%29.pdf", "category": "bonus", "bonus_number": 10, "order": 10},
+        {"id": "b11", "title": "Guia Supermercado", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/d33yr4r5_E-book--Lancheira-----Guia--Supermercado%20%281%29.pdf", "category": "bonus", "bonus_number": 11, "order": 11},
+        {"id": "b12", "title": "Guia sobre Açúcar", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/kgzj5cn1_E-book--Lancheira-----A%C3%A7%C3%BAcar%20%281%29.pdf", "category": "bonus", "bonus_number": 12, "order": 12},
+        {"id": "b13", "title": "Entendendo o Autismo", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/07h8h20w_Entendendo%20o%20Autismo.pdf", "category": "bonus", "bonus_number": 13, "order": 13},
+        {"id": "b14", "title": "Atividades de Estimulação Cognitiva", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/d7rndwf2_Atividades%20de%20Estimula%C3%A7%C3%A3o%20Cognitiva.pdf", "category": "bonus", "bonus_number": 14, "order": 14},
+        {"id": "b15", "title": "Desenvolvendo o Potencial", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/9p05v358_Desenvolvendo%20o%20Potencial.pdf", "category": "bonus", "bonus_number": 15, "order": 15},
+        {"id": "b16", "title": "+100 Atividades de Alfabetização", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/5ngk3ehi_%2B100%20ATIVIDADES%20DE%20ALFBETIZA%C3%87%C3%83O.pdf", "category": "bonus", "bonus_number": 16, "order": 16},
+        {"id": "b17", "title": "Livro da Leitura - Sílabas Simples", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/jz4x10tl_LIVRO-DA-LEITURA-SILABAS-SIMPLES-A.B.pdf.pdf", "category": "bonus", "bonus_number": 17, "order": 17},
+        {"id": "b18", "title": "Régua da Leitura", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/2vmtan7e_R%C3%89GUA%20DA%20LEITURA%20.pdf.pdf", "category": "bonus", "bonus_number": 18, "order": 18},
+        {"id": "b19", "title": "Tabela de Palavras em Inglês", "pdf_url": "https://customer-assets.emergentagent.com/job_pedagogy-music-hub/artifacts/vmkmf1oc_TABELA%20DE%20PALAVRAS%20EM%20INGLES.pdf", "category": "bonus", "bonus_number": 19, "order": 19},
+    ]
+    await db.resources.insert_many(resources)
+    logger.info(f"Seeded {len(resources)} bonus resources")
 
     # Create indexes
     await db.songs.create_index("id", unique=True)

@@ -18,7 +18,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showInstall, setShowInstall] = useState(false);
+  const [showInstall, setShowInstall] = useState(true);
 
   const handleLogin = async () => {
     if (!email || !name || !password) { setError('Preencha todos os campos'); return; }
