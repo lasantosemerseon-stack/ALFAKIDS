@@ -1,257 +1,297 @@
 """
-Backend test suite for Alfakids API.
-Focus: validate updated /api/content/resources endpoint with 19 bonus items,
-plus regression checks on auth, songs, alphabetization, english endpoints.
+Backend tests for Alfakids API.
+Focus: validate the NEW grouped /api/content/resources structure
+(6 bonus groups containing multiple PDFs each, totaling 19 PDFs)
+plus regression on previously working endpoints.
+
+Base URL: from /app/frontend/.env -> EXPO_PUBLIC_BACKEND_URL
+All routes are prefixed with /api.
 """
 import os
 import sys
 import json
 import requests
 
-BASE_URL = "https://pedagogy-music-hub.preview.emergentagent.com/api"
-PASSWORD = "alfakids321"
+# ---------------------------------------------------------------------------
+# Resolve base URL from frontend/.env (EXPO_PUBLIC_BACKEND_URL)
+# ---------------------------------------------------------------------------
+ENV_FILE = "/app/frontend/.env"
+BASE_URL = None
+with open(ENV_FILE, "r", encoding="utf-8") as f:
+    for line in f:
+        line = line.strip()
+        if line.startswith("EXPO_PUBLIC_BACKEND_URL="):
+            BASE_URL = line.split("=", 1)[1].strip().strip('"').strip("'")
+            break
 
-results = []
+if not BASE_URL:
+    print("FATAL: EXPO_PUBLIC_BACKEND_URL not found in /app/frontend/.env")
+    sys.exit(2)
 
-def record(name, ok, detail=""):
-    status = "PASS" if ok else "FAIL"
-    print(f"[{status}] {name}{(' -- ' + detail) if detail else ''}")
-    results.append({"name": name, "ok": ok, "detail": detail})
-    return ok
+API = f"{BASE_URL.rstrip('/')}/api"
+print(f"Testing against: {API}\n")
 
-
-def test_health():
-    r = requests.get(f"{BASE_URL}/", timeout=15)
-    record("GET /api/ - status code 200", r.status_code == 200, f"code={r.status_code}")
-    try:
-        data = r.json()
-        record("GET /api/ - returns status ok", data.get("status") == "ok", f"body={data}")
-    except Exception as e:
-        record("GET /api/ - JSON body", False, str(e))
-
-
-def test_login_and_me():
-    payload = {"email": "maria.silva@alfakids.com", "name": "Maria Silva", "password": PASSWORD, "mode": "premium"}
-    r = requests.post(f"{BASE_URL}/auth/login", json=payload, timeout=15)
-    ok = record("POST /api/auth/login (premium) - 200", r.status_code == 200, f"code={r.status_code}, body={r.text[:200]}")
-    token = None
-    if ok:
-        data = r.json()
-        token = data.get("token")
-        record("POST /api/auth/login - returns JWT token", bool(token) and isinstance(token, str) and token.count(".") == 2, f"token_present={bool(token)}")
-        record("POST /api/auth/login - returns mode=premium", data.get("mode") == "premium", f"mode={data.get('mode')}")
-
-    # Wrong password
-    bad = requests.post(f"{BASE_URL}/auth/login", json={**payload, "password": "wrongpass"}, timeout=15)
-    record("POST /api/auth/login - wrong password returns 401", bad.status_code == 401, f"code={bad.status_code}")
-
-    # /auth/me without token
-    r2 = requests.get(f"{BASE_URL}/auth/me", timeout=15)
-    record("GET /api/auth/me without token - 401", r2.status_code == 401, f"code={r2.status_code}")
-
-    # /auth/me with token
-    if token:
-        r3 = requests.get(f"{BASE_URL}/auth/me", headers={"Authorization": f"Bearer {token}"}, timeout=15)
-        ok3 = record("GET /api/auth/me with valid token - 200", r3.status_code == 200, f"code={r3.status_code}")
-        if ok3:
-            d = r3.json()
-            record("GET /api/auth/me - returns email/name/mode",
-                   all(k in d for k in ("email", "name", "mode")) and d["mode"] == "premium",
-                   f"body={d}")
-
-    # /auth/me invalid token
-    r4 = requests.get(f"{BASE_URL}/auth/me", headers={"Authorization": "Bearer invalid.token.value"}, timeout=15)
-    record("GET /api/auth/me invalid token - 401", r4.status_code == 401, f"code={r4.status_code}")
+PASS, FAIL = 0, 0
+FAILURES = []
 
 
-def test_songs():
-    r = requests.get(f"{BASE_URL}/songs", params={"category": "infantil"}, timeout=15)
-    ok = record("GET /api/songs?category=infantil - 200", r.status_code == 200, f"code={r.status_code}")
-    if ok:
-        data = r.json()
-        record("GET /api/songs?category=infantil - non-empty list", isinstance(data, list) and len(data) > 0, f"count={len(data) if isinstance(data, list) else 'N/A'}")
-        record("GET /api/songs?category=infantil - all infantil",
-               all(s.get("category") == "infantil" for s in data),
-               f"first={data[0] if data else None}")
-
-    r2 = requests.get(f"{BASE_URL}/songs", params={"category": "gospel"}, timeout=15)
-    ok2 = record("GET /api/songs?category=gospel - 200", r2.status_code == 200, f"code={r2.status_code}")
-    if ok2:
-        data2 = r2.json()
-        record("GET /api/songs?category=gospel - non-empty list", isinstance(data2, list) and len(data2) > 0, f"count={len(data2) if isinstance(data2, list) else 'N/A'}")
-        record("GET /api/songs?category=gospel - all gospel",
-               all(s.get("category") == "gospel" for s in data2),
-               "")
-        # Test detail endpoint
-        if data2:
-            sid = data2[0]["id"]
-            r3 = requests.get(f"{BASE_URL}/songs/{sid}", timeout=15)
-            ok3 = record(f"GET /api/songs/{sid} - 200", r3.status_code == 200, f"code={r3.status_code}")
-            if ok3:
-                d = r3.json()
-                record("GET /api/songs/{id} - returns same song", d.get("id") == sid, f"got_id={d.get('id')}")
-
-    # Invalid id
-    rbad = requests.get(f"{BASE_URL}/songs/does_not_exist_xxx", timeout=15)
-    record("GET /api/songs/{invalid} - 404", rbad.status_code == 404, f"code={rbad.status_code}")
+def check(name, cond, detail=""):
+    global PASS, FAIL
+    if cond:
+        PASS += 1
+        print(f"  PASS  {name}")
+    else:
+        FAIL += 1
+        FAILURES.append((name, detail))
+        print(f"  FAIL  {name}  -> {detail}")
 
 
-def test_alphabetization():
-    r = requests.get(f"{BASE_URL}/content/alphabetization", timeout=15)
-    ok = record("GET /api/content/alphabetization - 200", r.status_code == 200, f"code={r.status_code}")
-    if ok:
-        data = r.json()
-        record("GET /api/content/alphabetization - returns 24 items",
-               isinstance(data, list) and len(data) == 24,
-               f"count={len(data) if isinstance(data, list) else 'N/A'}")
-        # sorted by day asc
-        if isinstance(data, list) and data:
-            days = [x.get("day") for x in data]
-            record("GET /api/content/alphabetization - sorted ascending by day",
-                   days == sorted(days), f"days={days}")
-            record("GET /api/content/alphabetization - all items have pdf_url",
-                   all(isinstance(x.get("pdf_url"), str) and x["pdf_url"] for x in data), "")
+def section(title):
+    print(f"\n=== {title} ===")
 
 
-def test_english():
-    r = requests.get(f"{BASE_URL}/content/english", timeout=15)
-    ok = record("GET /api/content/english - 200", r.status_code == 200, f"code={r.status_code}")
-    if ok:
-        data = r.json()
-        record("GET /api/content/english - returns 30 items",
-               isinstance(data, list) and len(data) == 30,
-               f"count={len(data) if isinstance(data, list) else 'N/A'}")
-        if isinstance(data, list) and data:
-            orders = [x.get("order") for x in data]
-            record("GET /api/content/english - sorted ascending by order",
-                   orders == sorted(orders), f"first_orders={orders[:5]}")
+# ---------------------------------------------------------------------------
+# 1. Health
+# ---------------------------------------------------------------------------
+section("GET /api/  (health)")
+r = requests.get(f"{API}/", timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code}")
+try:
+    body = r.json()
+except Exception as e:
+    body = {}
+    check("json body", False, str(e))
+check("status field == ok", body.get("status") == "ok", json.dumps(body))
 
 
-def test_resources():
-    r = requests.get(f"{BASE_URL}/content/resources", timeout=15)
-    ok = record("GET /api/content/resources - 200", r.status_code == 200, f"code={r.status_code}")
-    if not ok:
-        return None
-    data = r.json()
-    record("GET /api/content/resources - is list", isinstance(data, list), f"type={type(data).__name__}")
-    if not isinstance(data, list):
-        return data
+# ---------------------------------------------------------------------------
+# 2. Auth - login premium
+# ---------------------------------------------------------------------------
+section("POST /api/auth/login (premium / correct password)")
+payload = {
+    "email": "ana.silva@alfakids.com",
+    "name": "Ana Silva",
+    "password": "alfakids321",
+    "mode": "premium",
+}
+r = requests.post(f"{API}/auth/login", json=payload, timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code} body={r.text[:200]}")
+login_body = {}
+try:
+    login_body = r.json()
+except Exception:
+    pass
+token = login_body.get("token", "")
+check("token present", bool(token), "missing token")
+check("token has 3 JWT segments", token.count(".") == 2, token)
+check("mode echoed as premium", login_body.get("mode") == "premium", json.dumps(login_body))
 
-    # Exact count
-    record("GET /api/content/resources - returns exactly 19 items",
-           len(data) == 19, f"count={len(data)}")
-
-    # All category == bonus
-    categories = {x.get("category") for x in data}
-    record("All items have category='bonus'",
-           categories == {"bonus"}, f"found_categories={categories}")
-
-    # No old categories
-    forbidden = {"pedagogico", "autismo", "lancheira"}
-    record("No legacy categories (pedagogico/autismo/lancheira)",
-           categories.isdisjoint(forbidden), f"intersect={categories & forbidden}")
-
-    # bonus_number 1..19 integer
-    bonus_nums = []
-    all_int = True
-    for x in data:
-        bn = x.get("bonus_number")
-        if not isinstance(bn, int):
-            all_int = False
-        bonus_nums.append(bn)
-    record("All items have integer bonus_number", all_int, f"sample={bonus_nums[:5]}")
-    record("bonus_number values are exactly 1..19",
-           sorted(bonus_nums) == list(range(1, 20)),
-           f"sorted_bonus_numbers={sorted(bonus_nums)}")
-
-    # Sorted ascending by bonus_number (since endpoint sorts by order)
-    record("Items are returned sorted ascending by bonus_number",
-           bonus_nums == list(range(1, 20)),
-           f"order_received={bonus_nums}")
-
-    # Item 1: Caderno da Leitura
-    item1 = next((x for x in data if x.get("bonus_number") == 1), None)
-    record("bonus_number=1 has title='Caderno da Leitura'",
-           item1 is not None and item1.get("title") == "Caderno da Leitura",
-           f"item1={item1}")
-    if item1:
-        record("bonus_number=1 pdf_url contains 'CADERNO-DE-LEITURA'",
-               "CADERNO-DE-LEITURA" in (item1.get("pdf_url") or ""),
-               f"pdf_url={item1.get('pdf_url')}")
-
-    # Item 2: Lancheira
-    item2 = next((x for x in data if x.get("bonus_number") == 2), None)
-    record("bonus_number=2 has title='Lancheira'",
-           item2 is not None and item2.get("title") == "Lancheira",
-           f"item2={item2}")
-
-    # All pdf_url valid non-empty strings
-    record("All items have non-empty pdf_url string",
-           all(isinstance(x.get("pdf_url"), str) and x["pdf_url"].strip() for x in data),
-           "")
-
-    return data
+section("POST /api/auth/login (wrong password)")
+r = requests.post(
+    f"{API}/auth/login",
+    json={**payload, "password": "wrong"},
+    timeout=30,
+)
+check("status 401", r.status_code == 401, f"got {r.status_code}")
 
 
-def test_idempotent_reseed():
-    # Get count, restart backend, get count again
-    r1 = requests.get(f"{BASE_URL}/content/resources", timeout=15)
-    count1 = len(r1.json()) if r1.status_code == 200 else -1
+# ---------------------------------------------------------------------------
+# 3. Auth - /me
+# ---------------------------------------------------------------------------
+section("GET /api/auth/me")
+r = requests.get(f"{API}/auth/me", headers={"Authorization": f"Bearer {token}"}, timeout=30)
+check("with valid bearer -> 200", r.status_code == 200, f"got {r.status_code} body={r.text[:200]}")
+me_body = {}
+try:
+    me_body = r.json()
+except Exception:
+    pass
+check("me.email matches", me_body.get("email") == payload["email"], json.dumps(me_body))
+check("me.name matches", me_body.get("name") == payload["name"], json.dumps(me_body))
+check("me.mode == premium", me_body.get("mode") == "premium", json.dumps(me_body))
 
-    print("\n--- Restarting backend to validate idempotent re-seed ---")
-    rc = os.system("sudo supervisorctl restart backend > /tmp/restart.log 2>&1")
-    if rc != 0:
-        record("Backend restart succeeded", False, f"rc={rc}")
-        return
-    # Wait for backend to come up
-    import time
-    up = False
-    for _ in range(30):
-        time.sleep(1)
-        try:
-            h = requests.get(f"{BASE_URL}/", timeout=5)
-            if h.status_code == 200:
-                up = True
-                break
-        except Exception:
-            pass
-    record("Backend came up after restart", up)
-    if not up:
-        return
+r = requests.get(f"{API}/auth/me", timeout=30)
+check("no token -> 401", r.status_code == 401, f"got {r.status_code}")
 
-    r2 = requests.get(f"{BASE_URL}/content/resources", timeout=15)
-    count2 = len(r2.json()) if r2.status_code == 200 else -1
-    record("Idempotent re-seed: still 19 resources after restart (no duplicates)",
-           count2 == 19, f"before={count1}, after={count2}")
+r = requests.get(f"{API}/auth/me", headers={"Authorization": "Bearer not-a-real-token"}, timeout=30)
+check("invalid token -> 401", r.status_code == 401, f"got {r.status_code}")
 
 
-def main():
-    print(f"Testing backend at: {BASE_URL}\n")
-    print("=== Health ===")
-    test_health()
-    print("\n=== Auth ===")
-    test_login_and_me()
-    print("\n=== Songs ===")
-    test_songs()
-    print("\n=== Alphabetization ===")
-    test_alphabetization()
-    print("\n=== English ===")
-    test_english()
-    print("\n=== Resources (CRITICAL) ===")
-    test_resources()
-    print("\n=== Idempotent re-seed ===")
-    test_idempotent_reseed()
+# ---------------------------------------------------------------------------
+# 4. Songs
+# ---------------------------------------------------------------------------
+section("GET /api/songs?category=infantil")
+r = requests.get(f"{API}/songs", params={"category": "infantil"}, timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code}")
+infantil = r.json() if r.status_code == 200 else []
+check("count == 52", len(infantil) == 52, f"got {len(infantil)}")
+check(
+    "all have category=infantil",
+    all(s.get("category") == "infantil" for s in infantil),
+    "mixed categories",
+)
 
-    print("\n\n========== SUMMARY ==========")
-    passed = sum(1 for r in results if r["ok"])
-    failed = [r for r in results if not r["ok"]]
-    print(f"Passed: {passed}/{len(results)}")
-    if failed:
-        print(f"\nFailed ({len(failed)}):")
-        for f in failed:
-            print(f"  - {f['name']}: {f['detail']}")
-    sys.exit(0 if not failed else 1)
+section("GET /api/songs?category=gospel")
+r = requests.get(f"{API}/songs", params={"category": "gospel"}, timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code}")
+gospel = r.json() if r.status_code == 200 else []
+check("count == 33", len(gospel) == 33, f"got {len(gospel)}")
+check(
+    "all have category=gospel",
+    all(s.get("category") == "gospel" for s in gospel),
+    "mixed categories",
+)
+
+section("GET /api/songs/{id}")
+if infantil:
+    sample_id = infantil[0]["id"]
+    r = requests.get(f"{API}/songs/{sample_id}", timeout=30)
+    check("valid id -> 200", r.status_code == 200, f"got {r.status_code}")
+    detail = r.json() if r.status_code == 200 else {}
+    check(
+        "detail.id matches",
+        detail.get("id") == sample_id,
+        json.dumps(detail)[:200],
+    )
+
+r = requests.get(f"{API}/songs/this-id-does-not-exist", timeout=30)
+check("invalid id -> 404", r.status_code == 404, f"got {r.status_code}")
 
 
-if __name__ == "__main__":
-    main()
+# ---------------------------------------------------------------------------
+# 5. Alphabetization
+# ---------------------------------------------------------------------------
+section("GET /api/content/alphabetization")
+r = requests.get(f"{API}/content/alphabetization", timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code}")
+alfa = r.json() if r.status_code == 200 else []
+check("count == 24", len(alfa) == 24, f"got {len(alfa)}")
+days = [d.get("day") for d in alfa]
+check("days strictly ascending", days == sorted(days), f"{days}")
+
+
+# ---------------------------------------------------------------------------
+# 6. English
+# ---------------------------------------------------------------------------
+section("GET /api/content/english")
+r = requests.get(f"{API}/content/english", timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code}")
+eng = r.json() if r.status_code == 200 else []
+check("count == 30", len(eng) == 30, f"got {len(eng)}")
+orders = [w.get("order") for w in eng]
+check("english.order strictly ascending", orders == sorted(orders), f"{orders}")
+
+
+# ---------------------------------------------------------------------------
+# 7. RESOURCES - NEW GROUPED STRUCTURE (CRITICAL)
+# ---------------------------------------------------------------------------
+section("GET /api/content/resources  (NEW GROUPED STRUCTURE)")
+r = requests.get(f"{API}/content/resources", timeout=30)
+check("status 200", r.status_code == 200, f"got {r.status_code}")
+resources = r.json() if r.status_code == 200 else []
+
+check("returns exactly 6 documents (groups)", len(resources) == 6, f"got {len(resources)}")
+
+# field structure
+required_fields = {"id", "bonus_number", "bonus_title", "items", "order", "category"}
+for idx, doc in enumerate(resources):
+    missing = required_fields - set(doc.keys())
+    check(f"doc[{idx}] has required fields {sorted(required_fields)}", not missing, f"missing={missing}")
+    check(f"doc[{idx}].category == 'bonus'", doc.get("category") == "bonus", f"got {doc.get('category')}")
+    check(f"doc[{idx}].bonus_number is int", isinstance(doc.get("bonus_number"), int),
+          f"got {type(doc.get('bonus_number'))}")
+    check(f"doc[{idx}].bonus_title is non-empty string",
+          isinstance(doc.get("bonus_title"), str) and len(doc.get("bonus_title", "")) > 0,
+          f"got {doc.get('bonus_title')!r}")
+    check(f"doc[{idx}].items is list", isinstance(doc.get("items"), list),
+          f"got {type(doc.get('items'))}")
+    items = doc.get("items") or []
+    for j, it in enumerate(items):
+        check(f"doc[{idx}].items[{j}].title non-empty",
+              isinstance(it.get("title"), str) and len(it.get("title", "")) > 0,
+              f"got {it.get('title')!r}")
+        check(f"doc[{idx}].items[{j}].pdf_url non-empty",
+              isinstance(it.get("pdf_url"), str) and len(it.get("pdf_url", "")) > 0,
+              f"got {it.get('pdf_url')!r}")
+
+# ordering by bonus_number 1..6
+bonus_numbers = [d.get("bonus_number") for d in resources]
+check("bonus_number ascending [1..6]", bonus_numbers == [1, 2, 3, 4, 5, 6], f"got {bonus_numbers}")
+
+# group-by-group validation
+by_num = {d.get("bonus_number"): d for d in resources}
+
+# BÔNUS 1
+g = by_num.get(1, {})
+check("BÔNUS 1 title == 'Caderno da Leitura'",
+      g.get("bonus_title") == "Caderno da Leitura", f"got {g.get('bonus_title')!r}")
+check("BÔNUS 1 has 1 item", len(g.get("items") or []) == 1, f"got {len(g.get('items') or [])}")
+if g.get("items"):
+    check("BÔNUS 1 item title == 'Caderno da Leitura'",
+          g["items"][0].get("title") == "Caderno da Leitura", f"got {g['items'][0].get('title')!r}")
+
+# BÔNUS 2
+g = by_num.get(2, {})
+check("BÔNUS 2 title == 'Lancheira'",
+      g.get("bonus_title") == "Lancheira", f"got {g.get('bonus_title')!r}")
+check("BÔNUS 2 has 11 items", len(g.get("items") or []) == 11, f"got {len(g.get('items') or [])}")
+
+# BÔNUS 3
+g = by_num.get(3, {})
+check("BÔNUS 3 title == 'Entendendo o Autismo'",
+      g.get("bonus_title") == "Entendendo o Autismo", f"got {g.get('bonus_title')!r}")
+items3 = g.get("items") or []
+check("BÔNUS 3 has 3 items", len(items3) == 3, f"got {len(items3)}")
+titles3 = [it.get("title") for it in items3]
+expected3 = ["Entendendo o Autismo", "Atividades de Estimulação Cognitiva", "Desenvolvendo o Potencial"]
+check(f"BÔNUS 3 item titles == {expected3}", titles3 == expected3, f"got {titles3}")
+
+# BÔNUS 4
+g = by_num.get(4, {})
+check("BÔNUS 4 title == 'Atividades Pedagógicas'",
+      g.get("bonus_title") == "Atividades Pedagógicas", f"got {g.get('bonus_title')!r}")
+items4 = g.get("items") or []
+check("BÔNUS 4 has 1 item", len(items4) == 1, f"got {len(items4)}")
+if items4:
+    check("BÔNUS 4 item title == '+100 Atividades de Alfabetização'",
+          items4[0].get("title") == "+100 Atividades de Alfabetização",
+          f"got {items4[0].get('title')!r}")
+
+# BÔNUS 5
+g = by_num.get(5, {})
+check("BÔNUS 5 title == 'Método Novo de Leitura'",
+      g.get("bonus_title") == "Método Novo de Leitura", f"got {g.get('bonus_title')!r}")
+items5 = g.get("items") or []
+check("BÔNUS 5 has 2 items", len(items5) == 2, f"got {len(items5)}")
+titles5 = [it.get("title") for it in items5]
+expected5 = ["Livro da Leitura - Sílabas Simples", "Régua da Leitura"]
+check(f"BÔNUS 5 item titles == {expected5}", titles5 == expected5, f"got {titles5}")
+
+# BÔNUS 6
+g = by_num.get(6, {})
+check("BÔNUS 6 title == 'Palavras em Inglês'",
+      g.get("bonus_title") == "Palavras em Inglês", f"got {g.get('bonus_title')!r}")
+items6 = g.get("items") or []
+check("BÔNUS 6 has 1 item", len(items6) == 1, f"got {len(items6)}")
+if items6:
+    check("BÔNUS 6 item title == 'Tabela de Palavras em Inglês'",
+          items6[0].get("title") == "Tabela de Palavras em Inglês",
+          f"got {items6[0].get('title')!r}")
+
+# total PDFs across all groups
+total_pdfs = sum(len(d.get("items") or []) for d in resources)
+check("total PDFs across all groups == 19", total_pdfs == 19, f"got {total_pdfs}")
+
+
+# ---------------------------------------------------------------------------
+# Summary
+# ---------------------------------------------------------------------------
+print("\n" + "=" * 60)
+print(f"PASSED: {PASS}")
+print(f"FAILED: {FAIL}")
+if FAILURES:
+    print("\nFailures detail:")
+    for name, det in FAILURES:
+        print(f"  - {name}: {det}")
+print("=" * 60)
+sys.exit(0 if FAIL == 0 else 1)

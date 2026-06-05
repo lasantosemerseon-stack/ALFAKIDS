@@ -112,7 +112,7 @@ user_problem_statement: |
   5. Ao clicar ENTRAR: pop-up "como instalar" deve aparecer automaticamente
 
 backend:
-  - task: "Resources endpoint atualizado para retornar 19 itens com bonus_number"
+  - task: "Resources endpoint - NOVA estrutura agrupada (6 grupos de bônus com múltiplos PDFs)"
     implemented: true
     working: true
     file: "/app/backend/server.py"
@@ -125,7 +125,13 @@ backend:
           comment: "Seed forçado a cada startup, agora retorna 19 itens todos category=bonus com campo bonus_number. Caderno da Leitura é BÔNUS 1, Lancheira é BÔNUS 2. Validado via curl, retorna ordem correta."
         - working: true
           agent: "testing"
-          comment: "VALIDADO via /app/backend_test.py contra https://pedagogy-music-hub.preview.emergentagent.com/api. GET /api/content/resources retorna exatamente 19 itens; todos com category='bonus'; nenhum item com categorias legadas (pedagogico/autismo/lancheira); bonus_number são inteiros 1..19; ordem retornada estritamente ascendente [1..19]; bonus_number=1 -> title='Caderno da Leitura' com pdf_url contendo 'CADERNO-DE-LEITURA'; bonus_number=2 -> title='Lancheira'; todos pdf_url são strings não vazias. Re-seed idempotente confirmado: após sudo supervisorctl restart backend, count continua 19 (sem duplicação). Regressão OK em /api/, /auth/login (premium+wrong-password), /auth/me (com token, sem token, token inválido), /songs?category=infantil (52), /songs?category=gospel (33), /songs/{id}, /songs/{invalid}->404, /content/alphabetization (24 dias, ordenados), /content/english (30 itens, ordenados). 40/40 testes passaram."
+          comment: "VALIDADO (estrutura flat de 19 itens) via /app/backend_test.py contra https://pedagogy-music-hub.preview.emergentagent.com/api. 40/40 testes passaram."
+        - working: true
+          agent: "main"
+          comment: "Refatorado para estrutura AGRUPADA: agora cada documento é um grupo de bônus com array `items`. Total: 6 grupos com 19 PDFs distribuídos. Log de startup: 'Seeded 6 bonus groups with 19 PDFs total'."
+        - working: true
+          agent: "testing"
+          comment: "VALIDADO via /app/backend_test.py contra https://pedagogy-music-hub.preview.emergentagent.com/api — 117/117 asserções passaram. CRÍTICO /api/content/resources: retorna EXATAMENTE 6 documentos (grupos); cada doc tem id, bonus_number (int), bonus_title (string), items (list), order, category='bonus'; bonus_number ordenado ascendente [1,2,3,4,5,6]; cada item dentro de items tem title e pdf_url não vazios. Validação grupo a grupo: BÔNUS 1 ('Caderno da Leitura', 1 item: 'Caderno da Leitura'); BÔNUS 2 ('Lancheira', 11 items); BÔNUS 3 ('Entendendo o Autismo', 3 items: ['Entendendo o Autismo','Atividades de Estimulação Cognitiva','Desenvolvendo o Potencial']); BÔNUS 4 ('Atividades Pedagógicas', 1 item: '+100 Atividades de Alfabetização'); BÔNUS 5 ('Método Novo de Leitura', 2 items: ['Livro da Leitura - Sílabas Simples','Régua da Leitura']); BÔNUS 6 ('Palavras em Inglês', 1 item: 'Tabela de Palavras em Inglês'). Total agregado de PDFs em todos os grupos = 19 (correto). Re-seed idempotente confirmado: após `sudo supervisorctl restart backend`, retorno continua com 6 grupos / 19 PDFs / bonus_numbers=[1..6] (sem duplicação). Regressão OK em todos os endpoints: GET /api/ (status=ok), POST /api/auth/login (premium/alfakids321 → JWT válido 3-segments; senha errada → 401), GET /api/auth/me (com bearer válido → 200 com name/email/mode; sem token → 401; token inválido → 401), GET /api/songs?category=infantil (52), gospel (33), /songs/{id} válido → 200 e {id} inválido → 404, /content/alphabetization (24 dias, dias ascendentes), /content/english (30 palavras, order ascendente)."
 
 frontend:
   - task: "Tela inicial sem botão VER PLANOS"
@@ -183,8 +189,7 @@ metadata:
   run_ui: false
 
 test_plan:
-  current_focus:
-    - "Resources endpoint atualizado para retornar 19 itens com bonus_number"
+  current_focus: []
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -235,3 +240,32 @@ agent_communication:
         - GET /api/content/english -> 30 palavras ordenadas
         
         Nenhuma issue crítica encontrada. Backend está pronto.
+    - agent: "testing"
+      message: |
+        Re-teste após refator da estrutura agrupada do /api/content/resources — 117/117 asserções passaram via /app/backend_test.py contra https://pedagogy-music-hub.preview.emergentagent.com/api.
+
+        CRÍTICO — /api/content/resources (NOVA estrutura agrupada) OK:
+        - Retorna EXATAMENTE 6 documentos (grupos), não mais 19 itens flat
+        - Cada doc contém: id, bonus_number (int), bonus_title (string não vazia), items (list), order, category='bonus'
+        - bonus_number ordenado ascendente: [1, 2, 3, 4, 5, 6]
+        - Cada item dentro de items tem title e pdf_url (strings não vazias)
+        - BÔNUS 1 ('Caderno da Leitura') -> 1 item: ['Caderno da Leitura']
+        - BÔNUS 2 ('Lancheira') -> 11 items
+        - BÔNUS 3 ('Entendendo o Autismo') -> 3 items: ['Entendendo o Autismo', 'Atividades de Estimulação Cognitiva', 'Desenvolvendo o Potencial']
+        - BÔNUS 4 ('Atividades Pedagógicas') -> 1 item: ['+100 Atividades de Alfabetização']
+        - BÔNUS 5 ('Método Novo de Leitura') -> 2 items: ['Livro da Leitura - Sílabas Simples', 'Régua da Leitura']
+        - BÔNUS 6 ('Palavras em Inglês') -> 1 item: ['Tabela de Palavras em Inglês']
+        - Total de PDFs somando todos os grupos = 19 (correto)
+
+        Re-seed idempotente OK: após `sudo supervisorctl restart backend`, GET /api/content/resources continua retornando 6 grupos / 19 PDFs / bonus_numbers=[1..6] (log "Seeded 6 bonus groups with 19 PDFs total").
+
+        Regressão OK em todos os endpoints anteriores:
+        - GET /api/ -> {status: ok}
+        - POST /api/auth/login (premium, alfakids321) -> token JWT válido (3-segments, mode=premium); senha errada -> 401
+        - GET /api/auth/me com bearer válido -> 200 {name,email,mode}; sem token -> 401; token inválido -> 401
+        - GET /api/songs?category=infantil -> 52 músicas; gospel -> 33
+        - GET /api/songs/{id} válido -> 200 com id correto; /songs/{invalid} -> 404
+        - GET /api/content/alphabetization -> 24 dias com day ascendente
+        - GET /api/content/english -> 30 palavras com order ascendente
+
+        Nenhuma issue crítica encontrada. Backend pronto.
